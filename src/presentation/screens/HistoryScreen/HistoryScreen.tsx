@@ -6,7 +6,7 @@ import { NotificationCard } from '../../components/NotificationCard/Notification
 import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { useNotifications } from '../../hooks/useNotifications';
 import { styles } from './HistoryScreen.styles';
-import { parseDeepLink } from '../../../shared/utils/parseDeepLInk';
+import { parseDeepLink } from '../../../shared/utils/parseDeepLink';
 
 export const HistoryScreen = () => {
   const { notifications, markRead, markAllRead, refresh } = useNotifications();

@@ -1,7 +1,7 @@
 import { navigate } from '../../app/navigation/navigationRef';
 
 import { notificationRepository } from '../../app/container';
-import { parseDeepLink } from '../../shared/utils/parseDeepLInk';
+import { parseDeepLink } from '../../shared/utils/parseDeepLink';
 
 export class OneSignalNotificationHandler {
   onClick = (event: any) => {
