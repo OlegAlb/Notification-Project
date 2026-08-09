@@ -14,7 +14,7 @@ export class OneSignalNotificationHandler {
     const id = notification.notificationId;
 
     if (id) {
-      notificationRepository.markRead(id);
+      notificationRepository.markAsRead(id);
     }
 
     const data = notification.additionalData;

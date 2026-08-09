@@ -53,6 +53,12 @@
     "jsSrcsDir": "specs",
     "android": {
       "javaPackageName": "com.notificationproject"
+    },
+    "ios": {
+      "modulesProvider": {
+        "NativeNotificationHistory": "NativeNotificationHistory"
+      }
     }
   }
 }
+

@@ -10,15 +10,11 @@ export class NotificationRepositoryImpl implements NotificationRepository {
     return this.storage.getAll();
   }
 
-  markRead(id: string): void {
-    this.storage.markRead(id);
+  markAsRead(id: string): void {
+    this.storage.markAsRead(id);
   }
 
-  markAllRead(): void {
-    this.storage.markAllRead();
-  }
-
-  clear(): void {
-    this.storage.clear();
+  markAllAsRead(): void {
+    this.storage.markAllAsRead();
   }
 }

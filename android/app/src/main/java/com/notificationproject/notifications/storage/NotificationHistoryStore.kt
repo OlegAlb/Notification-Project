@@ -24,7 +24,7 @@ class NotificationHistoryStore(
         save(notifications)
     }
 
-    fun markRead(id: String) {
+    fun markAsRead(id: String) {
         val notifications =
             load().map {
                 if (it.id == id) {
@@ -37,7 +37,7 @@ class NotificationHistoryStore(
         save(notifications)
     }
 
-    fun markAllRead() {
+    fun markAllAsRead() {
         val notifications =
             load().map {
                 it.copy(isRead = true)

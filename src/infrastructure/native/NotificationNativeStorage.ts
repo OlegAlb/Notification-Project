@@ -9,15 +9,11 @@ export class NotificationNativeStorage {
     );
   }
 
-  markRead(id: string) {
-    NativeNotificationHistory.markRead(id);
+  markAsRead(id: string) {
+    NativeNotificationHistory.markAsRead(id);
   }
 
-  markAllRead() {
-    NativeNotificationHistory.markAllRead();
-  }
-
-  clear() {
-    NativeNotificationHistory.clear();
+  markAllAsRead() {
+    NativeNotificationHistory.markAllAsRead();
   }
 }

@@ -1,5 +1,12 @@
 import React from 'react';
-import { FlatList, ListRenderItem, Pressable, Text, View } from 'react-native';
+import {
+  FlatList,
+  ListRenderItem,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PushNotification } from '../../../domain/entities/PushNotification';
 import { NotificationCard } from '../../components/NotificationCard/NotificationCard';
@@ -9,12 +16,13 @@ import { styles } from './HistoryScreen.styles';
 import { parseDeepLink } from '../../../shared/utils/parseDeepLink';
 
 export const HistoryScreen = () => {
-  const { notifications, markRead, markAllRead, refresh } = useNotifications();
+  const { notifications, markAsRead, markAllAsRead, refresh } =
+    useNotifications();
 
   const navigation = useAppNavigation();
 
   const handleNotificationPress = async (notification: PushNotification) => {
-    await markRead(notification.id);
+    await markAsRead(notification.id);
 
     if (notification.action?.type === 'deeplink') {
       const { screen, id } = parseDeepLink(notification.action.value);
@@ -54,9 +62,9 @@ export const HistoryScreen = () => {
         renderItem={renderItem}
       />
       <View style={styles.content}>
-        <Pressable onPress={markAllRead} style={styles.button}>
+        <TouchableOpacity onPress={markAllAsRead} style={styles.button}>
           <Text style={styles.buttonText}>Mark all as read</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

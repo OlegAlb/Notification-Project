@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react-native';
 import React, { FC, useMemo } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 import { PushNotification } from '../../../domain/entities/PushNotification';
 import { styles } from './NotificationCard.styles';
@@ -34,7 +34,7 @@ export const NotificationCard: FC<NotificationCardProps> = ({
   };
 
   return (
-    <Pressable style={styles.container} onPress={handlePress}>
+    <TouchableOpacity style={styles.container} onPress={handlePress}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.title} numberOfLines={1}>
@@ -61,6 +61,6 @@ export const NotificationCard: FC<NotificationCardProps> = ({
           style={styles.image}
         />
       )}
-    </Pressable>
+    </TouchableOpacity>
   );
 };

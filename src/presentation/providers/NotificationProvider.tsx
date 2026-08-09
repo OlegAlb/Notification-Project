@@ -18,11 +18,9 @@ interface NotificationContextValue {
 
   refresh(): Promise<void>;
 
-  markRead(id: string): Promise<void>;
+  markAsRead(id: string): Promise<void>;
 
-  markAllRead(): Promise<void>;
-
-  clear(): Promise<void>;
+  markAllAsRead(): Promise<void>;
 }
 
 export const NotificationContext =
@@ -37,7 +35,7 @@ export function NotificationProvider({ children }: PropsWithChildren) {
     setNotifications(data);
   }, []);
 
-  const markRead = useCallback(
+  const markAsRead = useCallback(
     async (id: string) => {
       const notification = notifications.find(item => item.id === id);
 
@@ -45,7 +43,7 @@ export function NotificationProvider({ children }: PropsWithChildren) {
         return;
       }
 
-      notificationRepository.markRead(id);
+      notificationRepository.markAsRead(id);
 
       notificationNavigationHandler.handle(
         notification.action?.type,
@@ -57,14 +55,8 @@ export function NotificationProvider({ children }: PropsWithChildren) {
     [refresh],
   );
 
-  const markAllRead = useCallback(async () => {
-    notificationRepository.markAllRead();
-
-    refresh();
-  }, [refresh]);
-
-  const clear = useCallback(async () => {
-    notificationRepository.clear();
+  const markAllAsRead = useCallback(async () => {
+    notificationRepository.markAllAsRead();
 
     refresh();
   }, [refresh]);
@@ -77,11 +69,10 @@ export function NotificationProvider({ children }: PropsWithChildren) {
     () => ({
       notifications,
       refresh,
-      markRead,
-      markAllRead,
-      clear,
+      markAsRead,
+      markAllAsRead,
     }),
-    [notifications, refresh, markRead, markAllRead, clear],
+    [notifications, refresh, markAsRead, markAllAsRead],
   );
 
   return (

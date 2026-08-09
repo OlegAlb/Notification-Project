@@ -1,9 +1,9 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppNavigation } from '../../hooks/useAppNavigation';
-import { Pressable, Text, View } from 'react-native';
-import { styles } from './PromoScreen.style';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../../app/navigation/navigationRef';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
+import { styles } from './PromoScreen.style';
 
 export const PromoScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'Promo'>>();
@@ -19,9 +19,9 @@ export const PromoScreen = () => {
 
         <Text style={styles.text}>Promo id: {id}</Text>
 
-        <Pressable onPress={navigation.goBack} style={styles.button}>
+        <TouchableOpacity onPress={navigation.goBack} style={styles.button}>
           <Text style={styles.buttonText}>Go back</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

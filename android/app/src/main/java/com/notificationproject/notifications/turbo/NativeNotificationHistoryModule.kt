@@ -25,18 +25,13 @@ class NativeNotificationHistoryModule(
         return array
     }
 
-    override fun markRead(id: String) {
-        store.markRead(id)
+    override fun markAsRead(id: String) {
+        store.markAsRead(id)
     }
 
-    override fun markAllRead() {
-        store.markAllRead()
+    override fun markAllAsRead() {
+        store.markAllAsRead()
     }
-
-    override fun clear() {
-        store.clear()
-    }
-
 
     companion object {
         const val NAME = "NativeNotificationHistory"
