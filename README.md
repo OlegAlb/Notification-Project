@@ -1,97 +1,255 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Notification History
 
-# Getting Started
+Тестовое приложение на React Native для хранения и отображения истории push-уведомлений.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Приложение получает уведомления через OneSignal, сохраняет их локально и предоставляет React Native-интерфейс для просмотра истории, отметки уведомлений прочитанными и перехода по действиям из уведомления.
 
-## Step 1: Start Metro
+## Реализованный функционал
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### Работа с уведомлениями
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Реализованы:
 
-```sh
-# Using npm
-npm start
+- получение push-уведомления;
+- сохранение уведомления в локальное хранилище;
+- получение всей истории;
+- отметка отдельного уведомления как прочитанного;
+- отметка всех уведомлений как прочитанных;
+- обновление React Native UI после получения нового уведомления;
+- обработка переходов по deep link;
+- открытие внешних URL через WebView.
 
-# OR using Yarn
-yarn start
+### Native Module
+
+Доступ к нативной истории из React Native реализован через TurboModule:
+
+```text
+NativeNotificationHistory
+├── getNotifications()
+├── markAsRead(id)
+└── markAllAsRead()
 ```
 
-## Step 2: Build and run your app
+Контракт модуля описан через TypeScript Codegen.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Для Android и iOS используются нативные реализации соответствующего модуля.
+
+---
+
+# Архитектура
+
+Проект разделен на несколько основных уровней.
+
+```text
+src/
+├── app/
+│   ├── navigation/
+│   ├── App.tsx
+│   └── container.ts
+│
+├── domain/
+│   └── entities/
+│       └── PushNotification.ts
+│
+├── infrastructure/
+│   └── native/
+│       ├── NativeNotificationHistory.ts
+│       ├── NotificationNativeMapper.ts
+│       └── NotificationNativeStorage.ts
+│
+├── presentation/
+│   ├── components/
+│   ├── hooks/
+│   ├── providers/
+│   └── screens/
+│
+└── shared/
+    └── utils/
+```
+
+### Domain
+
+Содержит модель уведомления, используемую React Native частью приложения.
+
+`PushNotification` не зависит от конкретной реализации хранения или OneSignal.
+
+### Infrastructure
+
+Отвечает за взаимодействие с нативным кодом.
+
+`NativeNotificationHistory` — Codegen-контракт TurboModule.
+
+`NotificationNativeStorage` — небольшая абстракция над нативным хранилищем.
+
+Таким образом, UI не обращается напрямую к `TurboModuleRegistry`.
+
+### Presentation
+
+Содержит:
+
+- `NotificationProvider`;
+- `useNotifications`;
+- экран истории;
+- карточку уведомления;
+- навигацию;
+- WebView;
+- экран Promo.
+
+Provider подписывается на native event `onNotificationReceived` и обновляет историю без необходимости вручную перезагружать экран.
+
+---
+
+# Android
+
+Android является основной полностью проверенной реализацией.
+
+Используется нативное хранилище истории уведомлений.
+
+Основные части:
+
+```text
+android/app/src/main/java/com/notificationproject/
+└── notifications/
+    ├── model/
+    │   └── NotificationRecord.kt
+    ├── mapper/
+    │   └── NotificationMapper.kt
+    ├── storage/
+    │   └── NotificationHistoryStore.kt
+    ├── recorder/
+    │   └── NotificationHistoryRecorder.kt
+    ├── initialization/
+    │   └── OneSignalInitializer.kt
+    └── turbo/
+        ├── NativeNotificationHistoryModule.kt
+        └── NativeNotificationHistoryPackage.kt
+```
+
+Для OneSignal используется собственный mapper, который преобразует native notification в внутреннюю модель:
+
+```text
+OneSignal notification
+        ↓
+NotificationMapper
+        ↓
+NotificationRecord
+        ↓
+NotificationHistoryStore
+```
+
+### Native events
+
+TurboModule предоставляет события:
+
+```text
+onNotificationReceived
+onNotificationClicked
+```
+
+При получении уведомления native-часть:
+
+1. получает уведомление от OneSignal;
+2. преобразует его в `NotificationRecord`;
+3. сохраняет в локальное хранилище;
+4. уведомляет React Native через `onNotificationReceived`.
+
+React Native Provider получает событие и вызывает `refresh()`.
+
+---
+
+# iOS
+
+iOS-часть реализована с использованием тех же основных принципов:
+
+- `NotificationRecord`;
+- `NotificationParser`;
+- `NotificationStore`;
+- `NotificationHistoryRecorder`;
+- `NativeNotificationHistory`;
+- React Native Codegen;
+- App Group для хранения данных.
+
+Хранилище использует:
+
+```text
+UserDefaults(suiteName: ...)
+```
+
+что позволяет использовать App Group между основным приложением и Notification Service Extension.
+
+Для обработки payload используется отдельный `NotificationParser`, поскольку структура payload OneSignal на iOS отличается от Android.
+
+## Ограничение проверки iOS
+
+На момент выполнения задания моя подписка на Apple Developer Program истекла, поэтому я не смог полноценно проверить получение реальных APNs push-уведомлений на физическом iOS-устройстве.
+
+По этой причине для проверки iOS истории используется mock source:
+
+```text
+MockNotificationSource
+```
+
+Он создает тестовые payloads, максимально приближенные к структуре OneSignal и передает их через тот же parser и storage pipeline.
+
+Это позволяет проверить:
+
+- parsing payload;
+- создание `NotificationRecord`;
+- сохранение;
+- чтение истории;
+- `markAsRead`;
+- `markAllAsRead`;
+- работу React Native TurboModule с историей.
+
+Полноценное end-to-end тестирование APNs/OneSignal на iOS требует действующей Apple Developer Program и устройства/подписанных provisioning profiles.
+
+# Запуск
+
+## Требования
+
+### Общие
+
+- Node.js
+- npm
+- JDK
+- Android Studio / Android SDK
+- Xcode — для iOS
+- CocoaPods — для iOS
 
 ### Android
 
-```sh
-# Using npm
-npm run android
+Для запуска:
 
-# OR using Yarn
-yarn android
+```bash
+npm install
+
+npm run android
 ```
 
 ### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+```bash
+npm install
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+cd ios
+pod install
+cd ..
 
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+# OneSignal
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Для проекта используется OneSignal.
 
-## Step 3: Modify your app
+В репозитории присутствуют необходимые для тестового приложения конфигурационные данные OneSignal.
 
-Now that you have successfully run the app, let's make changes!
+Они используются исключительно для демонстрации работы тестового приложения и не должны рассматриваться как production secrets.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Для production-приложения конфигурацию следует вынести в соответствующий environment/configuration management.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+# Примечание
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Android-реализация является проверенной реализацией проекта.
 
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+iOS-часть сохранена в проекте для демонстрации реализации того же native API и архитектурного подхода на второй платформе. Ограничение с реальным APNs-тестированием связано исключительно с отсутствием действующей Apple Developer Program на момент выполнения задания.
