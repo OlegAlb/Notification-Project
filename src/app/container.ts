@@ -3,7 +3,7 @@ import { NotificationRepository } from '../domain/repositories/NotificationRepos
 import { NotificationNativeStorage } from '../infrastructure/native/NotificationNativeStorage';
 import { NotificationNavigationHandler } from '../infrastructure/navigation/NotificationNavigationHandler';
 import { OneSignalNotificationHandler } from '../infrastructure/onesignal/OneSignalNotificationHandler';
-import { OneSignalService } from '../infrastructure/onesignal/OneSignalService';
+// import { OneSignalService } from '../infrastructure/onesignal/OneSignalService';
 
 import { NotificationRepositoryImpl } from '../infrastructure/repository/NotificationRepositoryImpl';
 
@@ -14,7 +14,7 @@ export const notificationRepository: NotificationRepository =
 
 export const oneSignalHandler = new OneSignalNotificationHandler();
 
-export const oneSignalService = new OneSignalService();
+// export const oneSignalService = new OneSignalService();
 
 export const notificationNavigationHandler =
   new NotificationNavigationHandler();
