@@ -7,26 +7,23 @@ import com.notificationproject.notifications.model.NotificationRecord
 fun NotificationRecord.toWritableMap(): WritableMap {
     return Arguments.createMap().apply {
         putString("id", id)
+        putString("receivedAt", receivedAt)
+
         putString("title", title)
         putString("body", body)
 
-        putDouble(
-            "receivedAt",
-            receivedAt.toDouble(),
-        )
-
         putBoolean("isRead", isRead)
 
-        imageUrl?.let {
-            putString("imageUrl", it)
+        imageURL?.let {
+            putString("imageURL", it)
         }
 
-        actionType?.let {
-            putString("actionType", it)
+        deepLink?.let {
+            putString("deepLink", it)
         }
 
-        actionValue?.let {
-            putString("actionValue", it)
+        externalURL?.let {
+            putString("externalURL", it)
         }
     }
 }

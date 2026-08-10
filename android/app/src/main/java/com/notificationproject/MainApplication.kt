@@ -8,6 +8,7 @@ import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 
 import com.notificationproject.notifications.turbo.NativeNotificationHistoryPackage
+import com.notificationproject.notifications.initialization.OneSignalInitializer
 
 class MainApplication : Application(), ReactApplication {
 
@@ -25,6 +26,7 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    OneSignalInitializer.initialize(this)
     loadReactNative(this)
   }
 }

@@ -3,8 +3,9 @@ package com.notificationproject.notifications.turbo
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableArray
-import com.facebook.react.bridge.WritableMap
+import com.notificationproject.notifications.model.NotificationRecord
 import com.notificationproject.NativeNotificationHistorySpec
+import com.notificationproject.notifications.events.NotificationEventBus
 import com.notificationproject.notifications.storage.NotificationHistoryStore
 
 class NativeNotificationHistoryModule(
@@ -13,7 +14,29 @@ class NativeNotificationHistoryModule(
 
     private val store = NotificationHistoryStore(reactContext)
 
-    override fun getName() = NAME
+    private val notificationReceivedListener =
+        { notification: NotificationRecord ->
+            emitOnNotificationReceived(
+                notification.toWritableMap()
+            )
+        }
+
+    private val notificationClickedListener =
+        { notification: NotificationRecord ->
+            emitOnNotificationClicked(
+                notification.toWritableMap()
+            )
+        }
+
+    init {
+        NotificationEventBus.subscribeReceived(
+            notificationReceivedListener
+        )
+
+        NotificationEventBus.subscribeClicked(
+            notificationClickedListener
+        )
+    }
 
     override fun getNotifications(): WritableArray {
         val array = Arguments.createArray()
@@ -31,6 +54,18 @@ class NativeNotificationHistoryModule(
 
     override fun markAllAsRead() {
         store.markAllAsRead()
+    }
+
+    override fun invalidate() {
+        NotificationEventBus.unsubscribeReceived(
+            notificationReceivedListener
+        )
+
+        NotificationEventBus.unsubscribeClicked(
+            notificationClickedListener
+        )
+
+        super.invalidate()
     }
 
     companion object {

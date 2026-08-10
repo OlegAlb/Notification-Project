@@ -7,20 +7,21 @@ import React, {
   useState,
 } from 'react';
 
-import { PushNotification } from '../../domain/entities/PushNotification';
 import {
-  notificationNavigationHandler,
-  notificationRepository,
+  notificationClickHandler,
+  notificationStorage,
 } from '../../app/container';
+import NativeNotificationHistory from '../../../specs/NativeNotificationHistory';
+import { PushNotification } from '../../domain/PushNotification';
 
 interface NotificationContextValue {
   notifications: PushNotification[];
 
-  refresh(): Promise<void>;
+  refresh(): void;
 
-  markAsRead(id: string): Promise<void>;
+  markAsRead(id: string): void;
 
-  markAllAsRead(): Promise<void>;
+  markAllAsRead(): void;
 }
 
 export const NotificationContext =
@@ -29,41 +30,58 @@ export const NotificationContext =
 export function NotificationProvider({ children }: PropsWithChildren) {
   const [notifications, setNotifications] = useState<PushNotification[]>([]);
 
-  const refresh = useCallback(async () => {
-    const data = notificationRepository.getAll();
+  const refresh = useCallback(() => {
+    const data = notificationStorage.getAll();
 
     setNotifications(data);
   }, []);
 
   const markAsRead = useCallback(
-    async (id: string) => {
+    (id: string) => {
       const notification = notifications.find(item => item.id === id);
 
       if (!notification) {
         return;
       }
 
-      notificationRepository.markAsRead(id);
+      notificationStorage.markAsRead(id);
 
-      notificationNavigationHandler.handle(
-        notification.action?.type,
-        notification.action?.value,
-      );
-
-      await refresh();
+      refresh();
     },
-    [refresh],
+    [notifications, refresh],
   );
 
-  const markAllAsRead = useCallback(async () => {
-    notificationRepository.markAllAsRead();
+  const markAllAsRead = useCallback(() => {
+    notificationStorage.markAllAsRead();
 
     refresh();
   }, [refresh]);
 
   useEffect(() => {
     refresh();
+
+    const subscription = NativeNotificationHistory.onNotificationReceived(
+      () => {
+        refresh();
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
   }, [refresh]);
+
+  useEffect(() => {
+    const clickedSubscription = NativeNotificationHistory.onNotificationClicked(
+      notification => {
+        notificationClickHandler.handle(notification);
+      },
+    );
+
+    return () => {
+      clickedSubscription.remove();
+    };
+  }, []);
 
   const value = useMemo(
     () => ({

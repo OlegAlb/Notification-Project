@@ -1,10 +1,10 @@
 import { ChevronRight } from 'lucide-react-native';
 import React, { FC, useMemo } from 'react';
-import { Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 import { PushNotification } from '../../../domain/entities/PushNotification';
-import { styles } from './NotificationCard.styles';
 import { formatNotificationDate } from '../../../shared/utils/formatDate';
+import { styles } from './NotificationCard.styles';
 
 interface NotificationCardProps {
   notification: PushNotification;
@@ -16,13 +16,11 @@ export const NotificationCard: FC<NotificationCardProps> = ({
   notification,
   onPress,
 }) => {
-  const hasImage = Boolean(notification.imageUrl);
+  const hasImage = Boolean(notification.imageURL);
 
-  const hasAction = Boolean(notification.action);
+  const hasAction = Boolean(notification.externalURL || notification.deepLink);
 
   const isRead = notification.isRead;
-
-  // console.log('notifications', notification);
 
   const formattedDate = useMemo(
     () => formatNotificationDate(notification.receivedAt),
@@ -56,7 +54,7 @@ export const NotificationCard: FC<NotificationCardProps> = ({
 
       {hasImage && (
         <Image
-          source={{ uri: notification.imageUrl }}
+          source={{ uri: notification.imageURL! }}
           resizeMode="cover"
           style={styles.image}
         />

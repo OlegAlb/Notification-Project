@@ -1,10 +1,10 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HistoryScreen from '../../presentation/screens/HistoryScreen';
-import { WebViewScreen } from '../../presentation/screens/WebViewScreen/WebViewScreen';
+import WebViewScreen from '../../presentation/screens/WebViewScreen';
+import PromoScreen from '../../presentation/screens/PromoScreen';
 
 import { RootStackParamList } from './navigationRef';
-import PromoScreen from '../../presentation/screens/PromoScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
